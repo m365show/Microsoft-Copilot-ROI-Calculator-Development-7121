@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Layout Components
@@ -78,24 +78,36 @@ function App() {
               <h4 className="font-semibold text-gray-900 mb-4">Quick Links</h4>
               <ul className="space-y-2">
                 <li>
-                  <a href="/calculator" className="text-gray-600 hover:text-microsoft-blue transition-colors">
+                  <Link 
+                    to="/calculator" 
+                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
+                  >
                     ROI Calculator
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/stats" className="text-gray-600 hover:text-microsoft-blue transition-colors font-medium">
+                  <Link 
+                    to="/stats" 
+                    className="text-gray-600 hover:text-microsoft-blue transition-colors font-medium"
+                  >
                     📊 Community Stats
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/microsoft-365-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
+                  <Link 
+                    to="/microsoft-365-copilot" 
+                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
+                  >
                     M365 Copilot
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/github-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
+                  <Link 
+                    to="/github-copilot" 
+                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
+                  >
                     GitHub Copilot
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -115,19 +127,28 @@ function App() {
                   </a>
                 </li>
                 <li>
-                  <a href="/power-platform-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
+                  <Link 
+                    to="/power-platform-copilot" 
+                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
+                  >
                     Power Platform
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/dynamics-365-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
+                  <Link 
+                    to="/dynamics-365-copilot" 
+                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
+                  >
                     Dynamics 365
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/security-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
+                  <Link 
+                    to="/security-copilot" 
+                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
+                  >
                     Security Copilot
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import SEOHead from '../components/SEO/SEOHead';
@@ -453,13 +454,13 @@ const StatsPage = () => {
               <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
                 Join thousands of organizations who have discovered their Microsoft Copilot potential
               </p>
-              <a
-                href="/calculator"
+              <Link
+                to="/calculator"
                 className="bg-white text-microsoft-blue px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center space-x-2"
               >
                 <span>Start Your Assessment</span>
                 <SafeIcon icon={FiTarget} className="w-4 h-4" />
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>
