@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { trackROICalculation } from '../components/Analytics/AnalyticsTracker';
+import { FirebaseROIService } from '../services/firebaseService';
 
 const useCalculatorStore = create((set, get) => ({
   // Selected modules
@@ -22,10 +23,7 @@ const useCalculatorStore = create((set, get) => ({
   updateFormData: (module, data) => set((state) => ({
     formData: {
       ...state.formData,
-      [module]: {
-        ...state.formData[module],
-        ...data
-      }
+      [module]: { ...state.formData[module], ...data }
     }
   })),
 
@@ -53,8 +51,8 @@ const useCalculatorStore = create((set, get) => ({
     totalSteps: 0
   }),
 
-  // Calculate ROI
-  calculateROI: () => {
+  // Calculate ROI with Firebase integration
+  calculateROI: async () => {
     const { formData, selectedModules } = get();
     const results = {};
     let totalTimeSaved = 0;
@@ -72,25 +70,21 @@ const useCalculatorStore = create((set, get) => ({
           costSaved = timeSaved * (data.avgHourlyRate || 50);
           score = Math.min(100, (timeSaved / 1000) * 100);
           break;
-
         case 'github':
           timeSaved = calculateGitHubSavings(data);
           costSaved = timeSaved * (data.avgHourlyRate || 75);
           score = Math.min(100, (timeSaved / 800) * 100);
           break;
-
         case 'powerPlatform':
           timeSaved = calculatePowerPlatformSavings(data);
           costSaved = timeSaved * (data.avgHourlyRate || 60);
           score = Math.min(100, (timeSaved / 600) * 100);
           break;
-
         case 'dynamics365':
           timeSaved = calculateDynamics365Savings(data);
           costSaved = timeSaved * (data.avgHourlyRate || 65);
           score = Math.min(100, (timeSaved / 700) * 100);
           break;
-
         case 'security':
           timeSaved = calculateSecuritySavings(data);
           costSaved = timeSaved * (data.avgHourlyRate || 80);
@@ -118,8 +112,13 @@ const useCalculatorStore = create((set, get) => ({
 
     set({ results: finalResults });
 
-    // Track the calculation for analytics
-    trackROICalculation(selectedModules, finalResults);
+    // Save to Firebase and track analytics
+    try {
+      await FirebaseROIService.saveCalculation(formData, finalResults, selectedModules);
+      await trackROICalculation(selectedModules, finalResults);
+    } catch (error) {
+      console.log('Error saving calculation:', error);
+    }
 
     return finalResults;
   }
@@ -128,7 +127,6 @@ const useCalculatorStore = create((set, get) => ({
 // Calculation functions
 const calculateM365Savings = (data) => {
   const { employees = 0, emailsPerDay = 0, meetingsPerWeek = 0, documentsPerWeek = 0, presentationsPerMonth = 0 } = data;
-  
   return Math.round(
     employees * (
       (emailsPerDay * 5 * 52 * 0.1) + // Email time savings (10% efficiency gain)
@@ -141,7 +139,6 @@ const calculateM365Savings = (data) => {
 
 const calculateGitHubSavings = (data) => {
   const { developers = 0, codeReviewsPerWeek = 0, bugsPerMonth = 0, featuresPerMonth = 0 } = data;
-  
   return Math.round(
     developers * (
       (codeReviewsPerWeek * 52 * 1.5) + // Code review time savings
@@ -153,7 +150,6 @@ const calculateGitHubSavings = (data) => {
 
 const calculatePowerPlatformSavings = (data) => {
   const { businessUsers = 0, appsPerMonth = 0, flowsPerMonth = 0, reportsPerWeek = 0 } = data;
-  
   return Math.round(
     businessUsers * (
       (appsPerMonth * 12 * 8) + // App development savings
@@ -165,7 +161,6 @@ const calculatePowerPlatformSavings = (data) => {
 
 const calculateDynamics365Savings = (data) => {
   const { salesReps = 0, leadsPerWeek = 0, customerInteractions = 0, reportsPerMonth = 0 } = data;
-  
   return Math.round(
     salesReps * (
       (leadsPerWeek * 52 * 0.5) + // Lead processing savings
@@ -177,7 +172,6 @@ const calculateDynamics365Savings = (data) => {
 
 const calculateSecuritySavings = (data) => {
   const { securityAnalysts = 0, incidentsPerMonth = 0, threatsPerWeek = 0, complianceChecks = 0 } = data;
-  
   return Math.round(
     securityAnalysts * (
       (incidentsPerMonth * 12 * 3) + // Incident response savings

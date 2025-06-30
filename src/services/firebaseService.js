@@ -1,17 +1,20 @@
-// Firebase Service - Graceful fallback when Firebase is not available
-import { isFirebaseAvailable, db, analytics } from '../lib/firebase';
-
-// Mock Firebase functions for when Firebase is not available
-const createMockService = (serviceName) => {
-  return new Proxy({}, {
-    get(target, prop) {
-      return (...args) => {
-        console.log(`Firebase ${serviceName}.${prop} called but Firebase not available - using fallback`);
-        return Promise.resolve(null);
-      };
-    }
-  });
-};
+// Firebase Service - Primary database and analytics service
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  doc, 
+  getDoc, 
+  updateDoc, 
+  setDoc, 
+  query, 
+  where, 
+  orderBy, 
+  limit, 
+  serverTimestamp 
+} from 'firebase/firestore';
+import { logEvent } from 'firebase/analytics';
+import { db, analytics, isFirebaseAvailable } from '../lib/firebase';
 
 // Collections
 const COLLECTIONS = {
@@ -25,20 +28,12 @@ const COLLECTIONS = {
 // Analytics Service
 export class FirebaseAnalyticsService {
   static trackPageView(pagePath, pageTitle) {
-    if (!isFirebaseAvailable()) {
-      console.log('Firebase Analytics not available - page view tracked locally');
-      return;
-    }
-
     try {
       if (analytics) {
-        // Dynamic import for Firebase Analytics
-        import('firebase/analytics').then(({ logEvent }) => {
-          logEvent(analytics, 'page_view', {
-            page_path: pagePath,
-            page_title: pageTitle,
-            timestamp: new Date().toISOString()
-          });
+        logEvent(analytics, 'page_view', {
+          page_path: pagePath,
+          page_title: pageTitle,
+          timestamp: new Date().toISOString()
         });
       }
       
@@ -53,7 +48,6 @@ export class FirebaseAnalyticsService {
     if (!isFirebaseAvailable()) return;
 
     try {
-      const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
       const sessionId = this.getOrCreateSessionId();
       
       await addDoc(collection(db, COLLECTIONS.pageViews), {
@@ -70,18 +64,11 @@ export class FirebaseAnalyticsService {
   }
 
   static trackEvent(eventName, properties = {}) {
-    if (!isFirebaseAvailable()) {
-      console.log(`Firebase Analytics not available - event ${eventName} tracked locally`);
-      return;
-    }
-
     try {
       if (analytics) {
-        import('firebase/analytics').then(({ logEvent }) => {
-          logEvent(analytics, eventName, {
-            ...properties,
-            timestamp: new Date().toISOString()
-          });
+        logEvent(analytics, eventName, {
+          ...properties,
+          timestamp: new Date().toISOString()
         });
       }
 
@@ -96,7 +83,6 @@ export class FirebaseAnalyticsService {
     if (!isFirebaseAvailable()) return;
 
     try {
-      const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
       const sessionId = this.getOrCreateSessionId();
       
       await addDoc(collection(db, COLLECTIONS.analytics), {
@@ -160,8 +146,6 @@ export class FirebaseQuestionnaireService {
     }
 
     try {
-      const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
-      
       const responseData = {
         module_id: moduleId,
         responses: responses,
@@ -189,8 +173,6 @@ export class FirebaseQuestionnaireService {
     if (!isFirebaseAvailable()) return;
 
     try {
-      const { doc, getDoc, updateDoc, setDoc, serverTimestamp } = await import('firebase/firestore');
-      
       const benchmarkId = `${responses.jobTitle}_${moduleId}`.replace(/\s+/g, '_').toLowerCase();
       const benchmarkRef = doc(db, COLLECTIONS.benchmarks, benchmarkId);
       
@@ -226,8 +208,6 @@ export class FirebaseQuestionnaireService {
     if (!isFirebaseAvailable()) return null;
 
     try {
-      const { query, collection, where, limit, getDocs } = await import('firebase/firestore');
-      
       const q = query(
         collection(db, COLLECTIONS.benchmarks),
         where('job_title', '==', jobTitle),
@@ -250,8 +230,6 @@ export class FirebaseQuestionnaireService {
     if (!isFirebaseAvailable()) return [];
 
     try {
-      const { query, collection, where, orderBy, limit, getDocs } = await import('firebase/firestore');
-      
       const q = query(
         collection(db, COLLECTIONS.questionnaireResponses),
         where('module_id', '==', moduleId),
@@ -286,8 +264,6 @@ export class FirebaseROIService {
     }
 
     try {
-      const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
-      
       const calculationData = {
         company_info: formData.company,
         selected_modules: selectedModules,
@@ -313,8 +289,6 @@ export class FirebaseROIService {
     if (!isFirebaseAvailable()) return [];
 
     try {
-      const { query, collection, where, orderBy, limit, getDocs } = await import('firebase/firestore');
-      
       const q = query(
         collection(db, COLLECTIONS.roiCalculations),
         where('session_id', '==', sessionId),
@@ -375,8 +349,6 @@ export class FirebaseStatsService {
     }
 
     try {
-      const { collection, getDocs } = await import('firebase/firestore');
-      
       const [responses, calculations] = await Promise.all([
         getDocs(collection(db, COLLECTIONS.questionnaireResponses)),
         getDocs(collection(db, COLLECTIONS.roiCalculations))
@@ -462,3 +434,6 @@ export class FirebaseStatsService {
     return insights.sort((a, b) => b.percentage - a.percentage);
   }
 }
+
+// Export Firebase availability check
+export { isFirebaseAvailable };

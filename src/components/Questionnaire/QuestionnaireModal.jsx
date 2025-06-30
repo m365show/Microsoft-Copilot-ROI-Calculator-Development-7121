@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
-import supabase from '../../lib/supabase';
+import { FirebaseQuestionnaireService, FirebaseAnalyticsService } from '../../services/firebaseService';
 
 const { FiX, FiChevronRight, FiChevronLeft, FiCheck, FiStar, FiTrendingUp, FiUsers, FiClock, FiTarget } = FiIcons;
 
@@ -27,106 +27,59 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
   const fetchEnhancedBenchmarks = async () => {
     try {
       // Get job role benchmarks
-      const { data: benchmarks } = await supabase
-        .from('job_role_benchmarks_roi_2024')
-        .select('*')
-        .eq('job_title', responses.jobTitle)
-        .eq('module_id', moduleData.moduleId);
+      const benchmarks = await FirebaseQuestionnaireService.getBenchmarks(
+        responses.jobTitle,
+        moduleData.moduleId
+      );
 
       // Get similar user responses for peer comparison
-      const { data: peers } = await supabase
-        .from('questionnaire_responses_roi_2024')
-        .select('responses, created_at')
-        .eq('module_id', moduleData.moduleId)
-        .contains('responses', { jobTitle: responses.jobTitle })
-        .order('created_at', { ascending: false })
-        .limit(10);
+      const peers = await FirebaseQuestionnaireService.getSimilarUsers(
+        responses.jobTitle,
+        moduleData.moduleId,
+        10
+      );
 
-      // Calculate industry averages
-      const { data: industryData } = await supabase
-        .from('questionnaire_responses_roi_2024')
-        .select('responses')
-        .eq('module_id', moduleData.moduleId)
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      setBenchmarkData(benchmarks?.[0]);
+      setBenchmarkData(benchmarks);
       setSimilarUsers(peers || []);
-      
-      if (industryData) {
-        calculateIndustryBenchmarks(industryData);
-      }
     } catch (error) {
       console.log('Error fetching benchmarks:', error);
     }
   };
 
-  const calculateIndustryBenchmarks = (data) => {
-    const metrics = {
-      avgProductivity: 0,
-      avgSatisfaction: 0,
-      commonChallenges: {},
-      avgTimeSpent: {}
-    };
-
-    data.forEach(entry => {
-      const responses = entry.responses;
-      
-      // Calculate satisfaction averages
-      if (responses.willingnessToAdopt) {
-        metrics.avgSatisfaction += responses.willingnessToAdopt;
-      }
-      
-      // Track common pain points
-      if (responses.currentPainPoints) {
-        responses.currentPainPoints.forEach(pain => {
-          metrics.commonChallenges[pain] = (metrics.commonChallenges[pain] || 0) + 1;
-        });
-      }
-    });
-
-    metrics.avgSatisfaction = (metrics.avgSatisfaction / data.length).toFixed(1);
-    setIndustryBenchmarks(metrics);
-  };
-
   const generateAISuggestions = () => {
     const suggestions = {};
-    
+
     // AI-powered suggestions based on job role and experience
     if (responses.jobTitle && responses.experience) {
       const experienceLevel = responses.experience.split('-')[0];
       const isExperienced = parseInt(experienceLevel) > 5;
-      
+
       switch (moduleData.moduleId) {
         case 'm365':
           suggestions.emailVolume = isExperienced ? '51-100' : '21-50';
           suggestions.meetingsPerWeek = responses.teamSize > 10 ? 15 : 8;
           suggestions.timeOnAdmin = isExperienced ? 3 : 6;
           break;
-          
         case 'github':
           suggestions.codingHoursPerDay = isExperienced ? '7-8 hours' : '5-6 hours';
           suggestions.codeReviewsPerWeek = Math.min(responses.teamSize || 5, 10);
           suggestions.bugsPerMonth = isExperienced ? 15 : 25;
           break;
-          
         case 'powerPlatform':
           suggestions.automationExperience = isExperienced ? 'Advanced' : 'Intermediate';
           suggestions.appsPerMonth = responses.teamSize > 20 ? 3 : 1;
           break;
-          
         case 'dynamics365':
           suggestions.leadsPerWeek = responses.jobTitle.includes('Manager') ? 50 : 25;
           suggestions.customerInteractions = isExperienced ? 40 : 25;
           break;
-          
         case 'security':
           suggestions.alertsPerDay = responses.teamSize > 15 ? '51-100' : '11-25';
           suggestions.incidentsPerMonth = isExperienced ? 20 : 35;
           break;
       }
     }
-    
+
     setAiSuggestions(suggestions);
   };
 
@@ -205,10 +158,7 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
   ];
 
   const handleResponse = (questionId, value) => {
-    setResponses(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
+    setResponses(prev => ({ ...prev, [questionId]: value }));
   };
 
   const applySuggestion = (questionId, suggestedValue) => {
@@ -236,36 +186,32 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
         const emailVolume = responses.emailVolume || '21-50';
         const emailCount = parseInt(emailVolume.split('-')[0]) || 25;
         estimatedHoursSaved = (emailCount * 0.1 * 5 * 52) + // Email savings
-                             (responses.meetingsPerWeek * 0.5 * 52) + // Meeting prep
-                             (responses.documentsPerWeek * 1.5 * 52); // Document creation
+          (responses.meetingsPerWeek * 0.5 * 52) + // Meeting prep
+          (responses.documentsPerWeek * 1.5 * 52); // Document creation
         break;
-        
       case 'github':
         const codingHours = responses.codingHoursPerDay || '5-6 hours';
         const hoursPerDay = parseInt(codingHours.split('-')[0]) || 5;
         estimatedHoursSaved = (hoursPerDay * 0.3 * 5 * 52) + // 30% coding efficiency
-                             (responses.codeReviewsPerWeek * 0.5 * 52) + // Review time
-                             (responses.bugsPerMonth * 1.2 * 12); // Bug fixing
+          (responses.codeReviewsPerWeek * 0.5 * 52) + // Review time
+          (responses.bugsPerMonth * 1.2 * 12); // Bug fixing
         break;
-        
       case 'powerPlatform':
         estimatedHoursSaved = (responses.appsPerMonth * 20 * 12) + // App development
-                             (responses.workflowsToAutomate * 8) + // Workflow automation
-                             (responses.reportingFrequency === 'Daily' ? 260 : 52); // Reporting
+          (responses.workflowsToAutomate * 8) + // Workflow automation
+          (responses.reportingFrequency === 'Daily' ? 260 : 52); // Reporting
         break;
-        
       case 'dynamics365':
         estimatedHoursSaved = (responses.leadsPerWeek * 0.3 * 52) + // Lead processing
-                             (responses.customerInteractions * 0.2 * 52) + // CRM efficiency
-                             (responses.reportingTasks?.length * 4 * 12); // Reporting
+          (responses.customerInteractions * 0.2 * 52) + // CRM efficiency
+          (responses.reportingTasks?.length * 4 * 12); // Reporting
         break;
-        
       case 'security':
         const alertsDaily = responses.alertsPerDay || '11-25';
         const alertCount = parseInt(alertsDaily.split('-')[0]) || 15;
         estimatedHoursSaved = (alertCount * 0.4 * 365) + // Alert analysis
-                             (responses.incidentsPerMonth * 2 * 12) + // Incident response
-                             (responses.complianceReporting * 10 * 12); // Compliance
+          (responses.incidentsPerMonth * 2 * 12) + // Incident response
+          (responses.complianceReporting * 10 * 12); // Compliance
         break;
     }
 
@@ -284,31 +230,23 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    
     try {
       // Calculate personalized ROI
       const personalizedROI = calculatePersonalizedROI(responses);
-      
-      // Save complete response data
-      const responseData = {
-        module_id: moduleData.moduleId,
-        responses: responses,
-        estimated_hours_saved: personalizedROI.estimatedHoursSaved,
-        estimated_cost_saved: personalizedROI.costSaved,
-        confidence_score: personalizedROI.confidenceScore,
-        completion_percentage: 100,
-        submitted_at: new Date().toISOString(),
-        session_id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      };
 
-      const { data, error } = await supabase
-        .from('questionnaire_responses_roi_2024')
-        .insert([responseData]);
+      // Save response to Firebase
+      await FirebaseQuestionnaireService.saveResponse(
+        moduleData.moduleId,
+        responses,
+        personalizedROI
+      );
 
-      if (error) throw error;
-
-      // Update job role benchmarks for future users
-      await updateBenchmarks(responses, personalizedROI);
+      // Track completion
+      await FirebaseAnalyticsService.trackQuestionnaireCompletion(
+        moduleData.moduleId,
+        responses,
+        personalizedROI
+      );
 
       // Prepare completion data
       const completionResult = {
@@ -316,7 +254,6 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
         personalizedROI,
         benchmarkData,
         similarUsers,
-        industryBenchmarks,
         moduleData,
         insights: generateInsights(responses, personalizedROI)
       };
@@ -328,7 +265,6 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
         onComplete(completionResult);
         onClose();
       }, 3000);
-
     } catch (error) {
       console.error('Error saving assessment:', error);
     } finally {
@@ -336,49 +272,9 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
     }
   };
 
-  const updateBenchmarks = async (responses, roi) => {
-    try {
-      const { data: existing } = await supabase
-        .from('job_role_benchmarks_roi_2024')
-        .select('*')
-        .eq('job_title', responses.jobTitle)
-        .eq('module_id', moduleData.moduleId)
-        .single();
-
-      if (existing) {
-        // Update existing benchmark
-        const newCount = existing.response_count + 1;
-        const newAvgHours = ((existing.avg_hours_saved_weekly * existing.response_count) + roi.weeklyHoursSaved) / newCount;
-        
-        await supabase
-          .from('job_role_benchmarks_roi_2024')
-          .update({
-            avg_hours_saved_weekly: Math.round(newAvgHours),
-            response_count: newCount,
-            last_updated: new Date().toISOString()
-          })
-          .eq('id', existing.id);
-      } else {
-        // Create new benchmark
-        await supabase
-          .from('job_role_benchmarks_roi_2024')
-          .insert([{
-            job_title: responses.jobTitle,
-            module_id: moduleData.moduleId,
-            avg_hours_saved_weekly: roi.weeklyHoursSaved,
-            median_satisfaction_score: responses.willingnessToAdopt || 7,
-            response_count: 1,
-            confidence_interval: roi.confidenceScore
-          }]);
-      }
-    } catch (error) {
-      console.log('Error updating benchmarks:', error);
-    }
-  };
-
   const generateInsights = (responses, roi) => {
     const insights = [];
-    
+
     // Performance insights
     if (roi.weeklyHoursSaved > 10) {
       insights.push({
@@ -387,7 +283,7 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
         message: `You could save ${roi.weeklyHoursSaved} hours per week - that's ${Math.round(roi.weeklyHoursSaved / 40 * 100)}% of a work week!`
       });
     }
-    
+
     // Comparison insights
     if (benchmarkData && roi.weeklyHoursSaved > benchmarkData.avg_hours_saved_weekly) {
       insights.push({
@@ -396,7 +292,7 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
         message: `Your potential savings are ${Math.round(((roi.weeklyHoursSaved - benchmarkData.avg_hours_saved_weekly) / benchmarkData.avg_hours_saved_weekly) * 100)}% higher than similar professionals.`
       });
     }
-    
+
     // Recommendation insights
     if (responses.currentToolUsage < 3) {
       insights.push({
@@ -405,7 +301,7 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
         message: 'Start with simple automation tasks to build confidence before tackling complex workflows.'
       });
     }
-    
+
     return insights;
   };
 
@@ -428,7 +324,6 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
                 <option key={index} value={option}>{option}</option>
               ))}
             </select>
-            
             {suggestion && !value && (
               <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-center justify-between">
@@ -484,7 +379,6 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
               placeholder="Enter number..."
               required={question.required}
             />
-            
             {suggestion && !value && (
               <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-center justify-between">
@@ -525,7 +419,6 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
                 </button>
               ))}
             </div>
-            
             {suggestion && !value && (
               <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-center justify-between">
@@ -586,7 +479,7 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold">{moduleData.title} Assessment</h2>
-                <p className="opacity-90">AI-powered personalized ROI analysis</p>
+                <p className="opacity-90">Firebase-powered personalized ROI analysis</p>
               </div>
               {!completionData && (
                 <button
@@ -597,7 +490,6 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
                 </button>
               )}
             </div>
-            
             {/* Progress bar */}
             {!completionData && (
               <div className="mt-4">
@@ -606,7 +498,7 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
                   <span>{Math.round(((currentStep + 1) / allQuestions.length) * 100)}%</span>
                 </div>
                 <div className="w-full bg-white bg-opacity-20 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-white h-2 rounded-full transition-all duration-300"
                     style={{ width: `${((currentStep + 1) / allQuestions.length) * 100}%` }}
                   />
@@ -636,13 +528,11 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
                     <div className="text-2xl font-bold text-blue-900">{completionData.personalizedROI.weeklyHoursSaved}</div>
                     <div className="text-sm text-blue-700">Hours saved/week</div>
                   </div>
-                  
                   <div className="bg-green-50 rounded-lg p-4">
                     <SafeIcon icon={FiTrendingUp} className="w-8 h-8 text-green-600 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-green-900">${completionData.personalizedROI.costSaved.toLocaleString()}</div>
                     <div className="text-sm text-green-700">Annual savings</div>
                   </div>
-                  
                   <div className="bg-purple-50 rounded-lg p-4">
                     <SafeIcon icon={FiTarget} className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-purple-900">{Math.round(completionData.personalizedROI.confidenceScore * 100)}%</div>
@@ -665,10 +555,8 @@ const QuestionnaireModal = ({ isOpen, onClose, moduleData, onComplete }) => {
                       <div>
                         <h4 className="font-semibold text-blue-900">Insights for {responses.jobTitle}s</h4>
                         <p className="text-blue-800 text-sm">
-                          Similar professionals save <strong>{benchmarkData.avg_hours_saved_weekly} hours/week</strong> 
-                          with {moduleData.title} (satisfaction: {benchmarkData.median_satisfaction_score}/10)
+                          Similar professionals save <strong>{benchmarkData.avg_hours_saved_weekly} hours/week</strong> with {moduleData.title} (satisfaction: {benchmarkData.median_satisfaction_score}/10)
                         </p>
-                        
                         {similarUsers.length > 0 && (
                           <div className="mt-2 flex items-center space-x-2">
                             <SafeIcon icon={FiUsers} className="w-4 h-4 text-purple-600" />

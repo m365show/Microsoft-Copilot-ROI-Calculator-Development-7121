@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import SEOHead from '../components/SEO/SEOHead';
-import supabase from '../lib/supabase';
+import { FirebaseStatsService } from '../services/firebaseService';
 import ReactECharts from 'echarts-for-react';
 
 const { FiTrendingUp, FiUsers, FiTarget, FiClock, FiDollarSign, FiBarChart, FiActivity, FiZap, FiShield } = FiIcons;
@@ -27,112 +27,13 @@ const StatsPage = () => {
 
   const fetchStatistics = async () => {
     try {
-      // Get total questionnaire responses
-      const { data: responses, error: responseError } = await supabase
-        .from('questionnaire_responses_roi_2024')
-        .select('*');
-
-      if (responseError) throw responseError;
-
-      // Calculate statistics
-      const totalUsers = responses?.length || 0;
-      const totalHoursSaved = responses?.reduce((sum, r) => sum + (r.estimated_hours_saved || 0), 0) || 0;
-      const totalCostSaved = responses?.reduce((sum, r) => sum + (r.estimated_cost_saved || 0), 0) || 0;
-      const averageROI = totalUsers > 0 ? Math.round(totalCostSaved / totalUsers) : 0;
-
-      // Module usage distribution
-      const moduleUsage = responses?.reduce((acc, r) => {
-        acc[r.module_id] = (acc[r.module_id] || 0) + 1;
-        return acc;
-      }, {}) || {};
-
-      // Weekly trends (last 8 weeks)
-      const weeklyTrends = generateWeeklyTrends(responses || []);
-
-      // Community insights
-      const communityInsights = generateCommunityInsights(responses || []);
-
-      setStats({
-        totalUsers,
-        averageROI,
-        totalHoursSaved,
-        totalCostSaved,
-        moduleUsage,
-        weeklyTrends,
-        communityInsights
-      });
+      const communityStats = await FirebaseStatsService.getCommunityStats();
+      setStats(communityStats);
     } catch (error) {
       console.error('Error fetching statistics:', error);
-      // Set demo data for development
-      setStats({
-        totalUsers: 1247,
-        averageROI: 4200,
-        totalHoursSaved: 125000,
-        totalCostSaved: 8750000,
-        moduleUsage: {
-          'm365': 450,
-          'github': 320,
-          'powerPlatform': 280,
-          'dynamics365': 150,
-          'security': 95
-        },
-        weeklyTrends: [
-          { week: 'Week 1', users: 45 },
-          { week: 'Week 2', users: 52 },
-          { week: 'Week 3', users: 68 },
-          { week: 'Week 4', users: 71 },
-          { week: 'Week 5', users: 89 },
-          { week: 'Week 6', users: 94 },
-          { week: 'Week 7', users: 112 },
-          { week: 'Week 8', users: 128 }
-        ],
-        communityInsights: [
-          { insight: 'Email management optimization', percentage: 68 },
-          { insight: 'Document creation automation', percentage: 54 },
-          { insight: 'Code review acceleration', percentage: 47 },
-          { insight: 'Business process automation', percentage: 42 },
-          { insight: 'Security threat detection', percentage: 38 }
-        ]
-      });
     } finally {
       setLoading(false);
     }
-  };
-
-  const generateWeeklyTrends = (responses) => {
-    const weeks = [];
-    const now = new Date();
-    
-    for (let i = 7; i >= 0; i--) {
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - (i * 7));
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6);
-      
-      const weekResponses = responses.filter(r => {
-        const responseDate = new Date(r.created_at || r.submitted_at);
-        return responseDate >= weekStart && responseDate <= weekEnd;
-      });
-      
-      weeks.push({
-        week: `Week ${8 - i}`,
-        users: weekResponses.length
-      });
-    }
-    
-    return weeks;
-  };
-
-  const generateCommunityInsights = (responses) => {
-    const insights = [
-      { insight: 'Email management optimization', percentage: Math.floor(Math.random() * 30) + 50 },
-      { insight: 'Document creation automation', percentage: Math.floor(Math.random() * 25) + 45 },
-      { insight: 'Code review acceleration', percentage: Math.floor(Math.random() * 20) + 40 },
-      { insight: 'Business process automation', percentage: Math.floor(Math.random() * 20) + 35 },
-      { insight: 'Security threat detection', percentage: Math.floor(Math.random() * 15) + 30 }
-    ];
-    
-    return insights.sort((a, b) => b.percentage - a.percentage);
   };
 
   const moduleNames = {
@@ -246,7 +147,7 @@ const StatsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-microsoft-blue mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading statistics...</p>
+          <p className="text-gray-600">Loading Firebase statistics...</p>
         </div>
       </div>
     );
@@ -255,9 +156,9 @@ const StatsPage = () => {
   return (
     <>
       <SEOHead 
-        title="Microsoft Copilot ROI Statistics - Community Insights & Trends"
-        description="Explore aggregated statistics and insights from thousands of Microsoft Copilot ROI assessments. See community trends, usage patterns, and productivity improvements."
-        keywords="Microsoft Copilot statistics, ROI trends, productivity analytics, AI adoption metrics, business intelligence"
+        title="Microsoft Copilot ROI Statistics - Firebase Community Insights" 
+        description="Explore real-time analytics from Firebase showing Microsoft Copilot ROI assessments. See community trends, usage patterns, and productivity improvements."
+        keywords="Microsoft Copilot statistics, Firebase analytics, ROI trends, productivity metrics, AI adoption insights"
         canonical="https://copilot-roi-calculator.com/stats"
       />
 
@@ -273,7 +174,7 @@ const StatsPage = () => {
               Community Statistics & Insights
             </motion.h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Real data from thousands of organizations discovering their Microsoft Copilot ROI potential
+              Real data from Firebase showing Microsoft Copilot ROI potential across organizations
             </p>
           </div>
 
@@ -368,7 +269,7 @@ const StatsPage = () => {
           >
             <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Community Pulse</h3>
             <p className="text-gray-600 text-center mb-8">
-              Top productivity challenges identified by our community
+              Top productivity challenges identified by our Firebase community
             </p>
             
             <div className="space-y-4">
@@ -450,9 +351,9 @@ const StatsPage = () => {
             className="text-center mt-12"
           >
             <div className="bg-gradient-to-r from-microsoft-blue to-purple-600 rounded-xl p-8 text-white">
-              <h3 className="text-2xl font-bold mb-4">Ready to Calculate Your ROI?</h3>
+              <h3 className="text-2xl font-bold mb-4">🔥 Powered by Firebase</h3>
               <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-                Join thousands of organizations who have discovered their Microsoft Copilot potential
+                Real-time analytics and community insights powered by Google Firebase
               </p>
               <Link
                 to="/calculator"

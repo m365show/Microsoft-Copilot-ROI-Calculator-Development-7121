@@ -1,6 +1,6 @@
-# Microsoft Copilot ROI Calculator - Firebase Integration
+# Microsoft Copilot ROI Calculator - Firebase Edition
 
-A comprehensive ROI calculator for Microsoft Copilot products with dual database support (Firebase + Supabase).
+A comprehensive ROI calculator for Microsoft Copilot products powered by Firebase for real-time analytics and data management.
 
 ## 🔥 Firebase Features
 
@@ -21,60 +21,21 @@ A comprehensive ROI calculator for Microsoft Copilot products with dual database
 ### Firebase Setup
 
 1. **Create Firebase Project**
-   ```bash
-   npm install -g firebase-tools
-   firebase login
-   firebase init
-   ```
+```bash
+npm install -g firebase-tools
+firebase login
+firebase init
+```
 
 2. **Configure Firebase**
-   - Update `src/lib/firebase.js` with your project credentials
-   - Set up Firestore database
-   - Enable Analytics
-   - Configure hosting
+- Update `src/lib/firebase.js` with your project credentials
+- Set up Firestore database
+- Enable Analytics
+- Configure hosting
 
-3. **Deploy to Firebase**
-   ```bash
-   npm run build
-   firebase deploy
-   ```
-
-### Local Development
-
-1. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-
-2. **Start Development Server**
-   ```bash
-   npm run dev
-   ```
-
-3. **Firebase Emulator (Optional)**
-   ```bash
-   firebase emulators:start
-   ```
-
-## 📊 Dual Database Architecture
-
-### Firebase Integration
-- **Real-time Analytics**: Live user tracking with Firebase Analytics
-- **Firestore Database**: Document-based storage for questionnaires and ROI calculations
-- **Cloud Functions**: Automated data processing and aggregation
-- **Firebase Hosting**: Global CDN for fast loading
-
-### Supabase Integration (Existing)
-- **PostgreSQL Database**: Relational data storage
-- **Real-time Subscriptions**: Live data updates
-- **Row Level Security**: Advanced access controls
-- **SQL Analytics**: Complex queries and reporting
-
-## 🔧 Firebase Configuration
-
-### Environment Variables
-Create `.env` file with Firebase credentials:
-```
+3. **Environment Variables**
+Create `.env` file:
+```env
 VITE_FIREBASE_API_KEY=your-api-key
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your-project-id
@@ -84,6 +45,25 @@ VITE_FIREBASE_APP_ID=1:123456789:web:abcdef123456
 VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
 
+### Local Development
+
+1. **Install Dependencies**
+```bash
+npm install
+```
+
+2. **Start Development Server**
+```bash
+npm run dev
+```
+
+3. **Firebase Emulator (Optional)**
+```bash
+firebase emulators:start
+```
+
+## 📊 Firebase Integration
+
 ### Firestore Collections
 - `questionnaire_responses` - User assessment data
 - `roi_calculations` - ROI calculation results
@@ -91,9 +71,7 @@ VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 - `job_role_benchmarks` - Performance benchmarks
 - `page_views` - Page view analytics
 
-## 📈 Analytics Features
-
-### Firebase Analytics
+### Analytics Features
 - **Real-time Tracking**: Live user behavior
 - **Event Tracking**: Custom events and conversions
 - **Audience Insights**: User demographics and interests
@@ -106,7 +84,7 @@ VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 - `module_selected`
 - `report_downloaded`
 
-## 🌐 Deployment Options
+## 🌐 Deployment
 
 ### Firebase Hosting
 ```bash
@@ -158,7 +136,6 @@ service firebase.storage {
 
 ## 📱 Progressive Web App
 
-### Service Worker
 Firebase automatically provides:
 - Offline caching
 - Background sync
@@ -170,22 +147,6 @@ Firebase automatically provides:
 - Automatic compression
 - Image optimization
 - Lazy loading
-
-## 🔄 Migration Guide
-
-### From Supabase to Firebase
-1. Export data from Supabase
-2. Transform data format for Firestore
-3. Import to Firebase collections
-4. Update client code to use Firebase services
-5. Test functionality
-6. Switch traffic gradually
-
-### Dual Database Setup
-- Use Firebase for real-time features
-- Use Supabase for complex queries
-- Sync data between databases
-- Choose primary database per feature
 
 ## 🎯 Features
 
@@ -225,4 +186,5 @@ For support and questions:
 ---
 
 **Built with ❤️ for productivity optimization**
-🔥 Firebase • 📊 Supabase • ⚡ React • 🎨 Tailwind CSS
+
+🔥 Firebase • ⚡ React • 🎨 Tailwind CSS

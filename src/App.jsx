@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Header from './components/Layout/Header';
 import FloatingROIButton from './components/Layout/FloatingROIButton';
 import AnalyticsTracker from './components/Analytics/AnalyticsTracker';
-import FirebaseAnalyticsTracker from './components/Analytics/FirebaseAnalyticsTracker';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -16,15 +15,13 @@ import PowerPlatformCopilotPage from './pages/PowerPlatformCopilotPage';
 import Dynamics365CopilotPage from './pages/Dynamics365CopilotPage';
 import SecurityCopilotPage from './pages/SecurityCopilotPage';
 import StatsPage from './pages/StatsPage';
-import FirebaseStatsPage from './pages/FirebaseStatsPage';
 import CalculatorApp from './components/Calculator/CalculatorApp';
 
 function App() {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Dual Analytics Tracking */}
+      {/* Firebase Analytics Tracking */}
       <AnalyticsTracker />
-      <FirebaseAnalyticsTracker />
       
       <Header />
       <FloatingROIButton />
@@ -39,7 +36,6 @@ function App() {
             <Route path="/dynamics-365-copilot" element={<Dynamics365CopilotPage />} />
             <Route path="/security-copilot" element={<SecurityCopilotPage />} />
             <Route path="/stats" element={<StatsPage />} />
-            <Route path="/firebase-stats" element={<FirebaseStatsPage />} />
             <Route path="/calculator" element={<CalculatorApp />} />
           </Routes>
         </AnimatePresence>
@@ -54,7 +50,7 @@ function App() {
                 Microsoft Copilot ROI Calculator
               </h3>
               <p className="text-gray-600 mb-4">
-                Powered by Data. Driven by Results.
+                Powered by Firebase. Driven by Results.
               </p>
               <p className="text-sm text-gray-500 mb-4">
                 Join 1,000+ businesses improving ROI with our Copilots.
@@ -66,21 +62,21 @@ function App() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-xs">📊</span>
-                  <span className="text-xs text-blue-600 font-medium">Supabase Analytics</span>
+                  <span className="text-xs text-blue-600 font-medium">Real-time Analytics</span>
                 </div>
               </div>
               <div className="flex space-x-4">
-                <a
-                  href="https://www.linkedin.com/in/m365-summit/"
-                  target="_blank"
+                <a 
+                  href="https://www.linkedin.com/in/m365-summit/" 
+                  target="_blank" 
                   rel="noopener noreferrer"
                   className="text-microsoft-blue hover:text-blue-600 transition-colors"
                 >
                   👨‍💻 Follow Mirko
                 </a>
-                <a
-                  href="https://www.linkedin.com/school/m365-show/"
-                  target="_blank"
+                <a 
+                  href="https://www.linkedin.com/school/m365-show/" 
+                  target="_blank" 
                   rel="noopener noreferrer"
                   className="text-microsoft-blue hover:text-blue-600 transition-colors"
                 >
@@ -94,42 +90,22 @@ function App() {
               <h4 className="font-semibold text-gray-900 mb-4">Quick Links</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link 
-                    to="/calculator" 
-                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
-                  >
+                  <Link to="/calculator" className="text-gray-600 hover:text-microsoft-blue transition-colors">
                     ROI Calculator
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    to="/stats" 
-                    className="text-gray-600 hover:text-microsoft-blue transition-colors font-medium"
-                  >
+                  <Link to="/stats" className="text-gray-600 hover:text-microsoft-blue transition-colors font-medium">
                     📊 Community Stats
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    to="/firebase-stats" 
-                    className="text-gray-600 hover:text-orange-500 transition-colors font-medium"
-                  >
-                    🔥 Firebase Analytics
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    to="/microsoft-365-copilot" 
-                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
-                  >
+                  <Link to="/microsoft-365-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
                     M365 Copilot
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    to="/github-copilot" 
-                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
-                  >
+                  <Link to="/github-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
                     GitHub Copilot
                   </Link>
                 </li>
@@ -141,9 +117,9 @@ function App() {
               <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
               <ul className="space-y-2">
                 <li>
-                  <a
-                    href="https://m365.show"
-                    target="_blank"
+                  <a 
+                    href="https://m365.show" 
+                    target="_blank" 
                     rel="noopener noreferrer"
                     className="text-gray-600 hover:text-microsoft-blue transition-colors"
                   >
@@ -151,26 +127,17 @@ function App() {
                   </a>
                 </li>
                 <li>
-                  <Link 
-                    to="/power-platform-copilot" 
-                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
-                  >
+                  <Link to="/power-platform-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
                     Power Platform
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    to="/dynamics-365-copilot" 
-                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
-                  >
+                  <Link to="/dynamics-365-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
                     Dynamics 365
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    to="/security-copilot" 
-                    className="text-gray-600 hover:text-microsoft-blue transition-colors"
-                  >
+                  <Link to="/security-copilot" className="text-gray-600 hover:text-microsoft-blue transition-colors">
                     Security Copilot
                   </Link>
                 </li>
@@ -186,7 +153,7 @@ function App() {
               Helping organizations worldwide discover their AI potential
             </p>
             <div className="mt-2 text-xs text-gray-400">
-              🔥 Firebase Integration • 📊 Supabase Analytics • ⚡ Real-time Insights
+              🔥 Firebase Integration • ⚡ Real-time Analytics • 📊 Live Insights
             </div>
           </div>
         </div>

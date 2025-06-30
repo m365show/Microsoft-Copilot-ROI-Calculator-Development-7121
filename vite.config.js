@@ -27,5 +27,8 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['firebase/app', 'firebase/firestore', 'firebase/analytics', 'firebase/auth', 'firebase/storage']
+  },
+  define: {
+    global: 'globalThis',
   }
 });
