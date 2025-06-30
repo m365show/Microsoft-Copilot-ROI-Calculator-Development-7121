@@ -10,8 +10,22 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     }
   },
-   build: {
+  build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['framer-motion', 'react-icons'],
+          charts: ['echarts', 'echarts-for-react'],
+          firebase: ['firebase/app', 'firebase/firestore', 'firebase/analytics']
+        }
+      }
+    }
   },
+  optimizeDeps: {
+    include: ['firebase/app', 'firebase/firestore', 'firebase/analytics', 'firebase/auth', 'firebase/storage']
+  }
 });

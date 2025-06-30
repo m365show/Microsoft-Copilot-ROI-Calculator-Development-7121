@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Header from './components/Layout/Header';
 import FloatingROIButton from './components/Layout/FloatingROIButton';
 import AnalyticsTracker from './components/Analytics/AnalyticsTracker';
+import FirebaseAnalyticsTracker from './components/Analytics/FirebaseAnalyticsTracker';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -15,12 +16,16 @@ import PowerPlatformCopilotPage from './pages/PowerPlatformCopilotPage';
 import Dynamics365CopilotPage from './pages/Dynamics365CopilotPage';
 import SecurityCopilotPage from './pages/SecurityCopilotPage';
 import StatsPage from './pages/StatsPage';
+import FirebaseStatsPage from './pages/FirebaseStatsPage';
 import CalculatorApp from './components/Calculator/CalculatorApp';
 
 function App() {
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Dual Analytics Tracking */}
       <AnalyticsTracker />
+      <FirebaseAnalyticsTracker />
+      
       <Header />
       <FloatingROIButton />
       
@@ -34,6 +39,7 @@ function App() {
             <Route path="/dynamics-365-copilot" element={<Dynamics365CopilotPage />} />
             <Route path="/security-copilot" element={<SecurityCopilotPage />} />
             <Route path="/stats" element={<StatsPage />} />
+            <Route path="/firebase-stats" element={<FirebaseStatsPage />} />
             <Route path="/calculator" element={<CalculatorApp />} />
           </Routes>
         </AnimatePresence>
@@ -53,6 +59,16 @@ function App() {
               <p className="text-sm text-gray-500 mb-4">
                 Join 1,000+ businesses improving ROI with our Copilots.
               </p>
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs">🔥</span>
+                  <span className="text-xs text-orange-600 font-medium">Firebase Powered</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs">📊</span>
+                  <span className="text-xs text-blue-600 font-medium">Supabase Analytics</span>
+                </div>
+              </div>
               <div className="flex space-x-4">
                 <a
                   href="https://www.linkedin.com/in/m365-summit/"
@@ -91,6 +107,14 @@ function App() {
                     className="text-gray-600 hover:text-microsoft-blue transition-colors font-medium"
                   >
                     📊 Community Stats
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/firebase-stats" 
+                    className="text-gray-600 hover:text-orange-500 transition-colors font-medium"
+                  >
+                    🔥 Firebase Analytics
                   </Link>
                 </li>
                 <li>
@@ -161,6 +185,9 @@ function App() {
             <p className="text-sm text-gray-500 mt-2">
               Helping organizations worldwide discover their AI potential
             </p>
+            <div className="mt-2 text-xs text-gray-400">
+              🔥 Firebase Integration • 📊 Supabase Analytics • ⚡ Real-time Insights
+            </div>
           </div>
         </div>
       </footer>

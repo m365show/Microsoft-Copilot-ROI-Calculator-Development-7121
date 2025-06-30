@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Public read access to statistics and benchmarks
+    match /questionnaire_responses/{document} {
+      allow read: if true;
+      allow write: if true; // Allow anonymous users to submit responses
+    }
+    
+    match /roi_calculations/{document} {
+      allow read: if true;
+      allow write: if true; // Allow anonymous users to save calculations
+    }
+    
+    match /analytics/{document} {
+      allow read: if true;
+      allow write: if true; // Allow anonymous analytics tracking
+    }
+    
+    match /job_role_benchmarks/{document} {
+      allow read: if true;
+      allow write: if true; // Allow automatic benchmark updates
+    }
+    
+    match /page_views/{document} {
+      allow read: if true;
+      allow write: if true; // Allow page view tracking
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "questionnaire_responses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "module_id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "submitted_at",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "roi_calculations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "session_id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "calculated_at",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "analytics",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "event_name",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "job_role_benchmarks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "job_title",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "module_id",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
